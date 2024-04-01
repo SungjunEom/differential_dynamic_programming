@@ -8,6 +8,24 @@ class System:
         self.states = np.zeros(horizon)
         self.system = system
 
+    def diff_x(self, func, x0, u0, delta=1e-7):
+        return (func(x0+delta, u0)-func(x0, u0))/delta
+
+    def diff_u(self, func, x0, u0, delta=1e-7):
+        return (func(x0, u0+delta)-func(x0, u0))/delta
+    
+    def diff_xx(self, func, x0, u0, delta=1e-7):
+        return (self.diff_x(func, x0+delta, u0) - self.diff_x(func, x0, u0))/delta
+    
+    def diff_uu(self, func, x0, u0, delta=1e-7):
+        return (self.diff_u(func, x0, u0+delta) - self.diff_u(func, x0, u0))/delta
+    
+    def diff_xu(self, func, x0, u0, delta=1e-7):
+        return (self.diff_x(func, x0, u0+delta) - self.diff_x(func, x0, u0))/delta
+        
+    def diff_ux(self, func, x0, u0, delta=1e-7):
+        return (self.diff_u(func, x0+delta, u0) - self.diff_u(func, x0, u0))/delta
+    
     def optimizer(self, J):
         pass
 
@@ -30,6 +48,4 @@ def system(x, u):
 
 if __name__ == "__main__":
     wow = System(cost, 10, system)
-    print(wow.states)
-    wow.forward()
-    print(wow.states)
+    print(wow.diff_u(wow.cost, 9, 10))
