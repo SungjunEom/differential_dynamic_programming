@@ -1,11 +1,12 @@
 import numpy as np
 
 class System:
-    def __init__(self, cost, horizon, system):
-        self.cost = cost
+    def __init__(self, loss, horizon, system):
+        self.loss = loss
         self.horizon = horizon
         self.inputs = np.random.random(horizon-1)
         self.states = np.zeros(horizon)
+        self.delta_states = np.zeros(horizon)
         self.system = system
 
     def diff_x(self, func, x0, u0, delta=1e-7):
@@ -26,20 +27,23 @@ class System:
     def diff_ux(self, func, x0, u0, delta=1e-7):
         return (self.diff_u(func, x0+delta, u0) - self.diff_u(func, x0, u0))/delta
     
-    def optimizer(self, J):
-        pass
+    def optimizer(self, iter):
+        Quu_k = self.diff_uu(self.loss(self.states[iter], self.inputs[iter])) \
+                + self.diff_u(self.system(self.inputs[iter]))
 
     def forward(self):
         for i in range(1, len(self.states)):
-            self.states[i] = system(self.states[i-1], self.inputs[i-1])
+            state =  system(self.states[i-1], self.inputs[i-1])
+            self.delta_states[i] = self.states[i] - state
+            self.states[i] = state
     
     def backward(self):
-        J = self.cost(self.states[-1], 0)
+        J = self.loss(self.states[-1], 0)
         for i in range(len(self.states)-2, 0, -1):
-            J = self.optimizer(J)
+            pass
         
 
-def cost(x, u):
+def loss(x, u):
     return x**2 + u**2
 
 def system(x, u):
@@ -47,5 +51,5 @@ def system(x, u):
 
 
 if __name__ == "__main__":
-    wow = System(cost, 10, system)
-    print(wow.diff_u(wow.cost, 9, 10))
+    wow = System(loss, 10, system)
+    print(wow.diff_u(wow.loss, 9, 10))
