@@ -1,0 +1,60 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+
+\usepackage{adjustbox}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{calrsfs}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{comment}
+\usepackage{amsmath,amssymb} % define this before the line numbering.
+\usepackage{color}
+\usepackage{subcaption}
+\usepackage{verbatim}
+
+\makeatletter
+\def\BState{\State\hskip-\ALG@thistlm}
+\makeatother
+
+\begin{document}
+
+\begin{algorithm}[t]
+\caption{Differential Dynamic Programming}\label{DDP}
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\begin{algorithmic}[1]
+\Require{Horizon \(N\), System $f(\cdot)$, Initial state $x_0$, Final state $x_N$ ,Loss function $l(\cdot)$, Final cost function $\phi(\cdot)$}
+\State Create an empty array $\mathbf{x}^{\langle \cdot \rangle}=[x_0,0,\ldots,x_N]$ with the initial and final state
+\State Create an empty array $\delta\mathbf{x}=[0,\ldots,0]$
+\State Create an empty input array $\mathbf{u}^{\langle \cdot \rangle}=[0,0,\ldots,0]$
+\State Initialize a variable $\epsilon_f^{\langle \cdot \rangle}$
+\For {$i = 0,1,2,\ldots$}\textcolor{gray}{\Comment{updating}}
+\For {$j = 0,1,2,\ldots,N-1$}\textcolor{gray}{\Comment{forward pass}}
+\State $x_{j+1}^{\langle i \rangle} \leftarrow f(x_j^{\langle i \rangle},u_j^{\langle i \rangle})$
+\If {$i>0$}
+\State $\delta x_{j+1} \leftarrow x_{j+1}^{\langle i \rangle} - x_{j+1}^{\langle i-1 \rangle}$
+\EndIf
+\EndFor
+\State $\epsilon_f^{\langle i \rangle} \leftarrow x_N - x_N^{\langle i \rangle}$
+\State $x_N^{\langle i \rangle} \leftarrow x_N$
+\State $V_x \leftarrow \left.\frac{d\phi(x)}{dx}\right|_{x=x_N}$
+\State $V_{xx} \leftarrow \left.\frac{d^2\phi(x)}{dx^2}\right|_{x=x_N}$
+\For {$j = N-1,N-2,\ldots,0$} \textcolor{gray}{\Comment{backward pass}}
+\State $Q_x \leftarrow \left[\frac{dl(x,u)}{dx}+\frac{df(x,u)}{dx}\cdot V_x\right]_{x=x_j^{\langle i \rangle},u=u_j^{\langle i \rangle}}$
+\State $Q_u \leftarrow \left[\frac{dl(x,u)}{du}+\frac{df(x,u)}{du}\cdot V_x\right]_{x=x_j^{\langle i \rangle},u=u_j^{\langle i \rangle}}$
+\State $Q_{xx} \leftarrow \left[\frac{d^2l(x,u)}{dx^2}+\left(\frac{df(x,u)}{dx}\right)^2\cdot V_x + V_x \cdot \frac{d^2f(x,u)}{dx^2}\right]_{x=x_j^{\langle i \rangle},u=u_j^{\langle i \rangle}}$
+\State $Q_{ux} \leftarrow \left[\frac{d^2l(x,u)}{dudx}+\left(\frac{df(x,u)}{du}\right)\cdot V_x \cdot \left(\frac{df(x,u)}{dx}\right) + V_x \cdot \frac{d^2f(x,u)}{dudx}\right]_{x=x_j^{\langle i \rangle},u=u_j^{\langle i \rangle}}$
+\State $Q_{uu} \leftarrow \left[\frac{d^2l(x,u)}{du^2}+\left(\frac{df(x,u)}{du}\right)^2\cdot V_x + V_x \cdot \frac{d^2f(x,u)}{du^2}\right]_{x=x_j^{\langle i \rangle},u=u_j^{\langle i \rangle}}$
+\State Let $k=-Q_{ux}^{-1}Q_{u}$ and $K=-Q_{uu}^{-1}Q_{ux}$
+\State $\delta u_j \leftarrow k+K\delta x_j$\textcolor{gray}{\Comment{updating the control input at j}}
+\State $V_x \leftarrow Q_x-K\cdot Q_{uu}\cdot k$\textcolor{gray}{\Comment{calculating $V_x$ and $V_{xx}$ for the next step}}
+\State $V_{xx} \leftarrow Q_{xx}-K\cdot Q_{uu}\cdot K$
+\EndFor
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+\end{document} 
