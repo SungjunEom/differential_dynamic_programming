@@ -1,6 +1,9 @@
 # Implementation of Differential Dynamic Programming
 ## Overview
-Work in progress.
+Work in progress. 
+
+Only 1-dimensional states and inputs for now.
+![pseudocode](./pcode.png)
 ## Gallery
 ![Errors](./Figure_1.png)
 ## References

@@ -27,9 +27,9 @@
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 \begin{algorithmic}[1]
 \Require{Horizon \(N\), System $f(\cdot)$, Initial state $x_0$, Final state $x_N$ ,Loss function $l(\cdot)$, Final cost function $\phi(\cdot)$}
-\State Create an empty array $\mathbf{x}^{\langle \cdot \rangle}=[x_0,0,\ldots,x_N]$ with the initial and final state
-\State Create an empty array $\delta\mathbf{x}=[0,\ldots,0]$
-\State Create an empty input array $\mathbf{u}^{\langle \cdot \rangle}=[0,0,\ldots,0]$
+\State $\mathbf{x}^{\langle \cdot \rangle}\leftarrow [x_0,0,\ldots,x_N]$
+\State $\delta\mathbf{x}\leftarrow [0,\ldots,0]$
+\State $\mathbf{u}^{\langle \cdot \rangle}\leftarrow [0,0,\ldots,0]$
 \State Initialize a variable $\epsilon_f^{\langle \cdot \rangle}$
 \For {$i = 0,1,2,\ldots$}\textcolor{gray}{\Comment{updating}}
 \For {$j = 0,1,2,\ldots,N-1$}\textcolor{gray}{\Comment{forward pass}}
@@ -53,6 +53,9 @@
 \State $V_x \leftarrow Q_x-K\cdot Q_{uu}\cdot k$\textcolor{gray}{\Comment{calculating $V_x$ and $V_{xx}$ for the next step}}
 \State $V_{xx} \leftarrow Q_{xx}-K\cdot Q_{uu}\cdot K$
 \EndFor
+\If {$\epsilon_f^{\langle i \rangle}$ is smaller than the threshold}
+escape the loop
+\EndIf
 \EndFor
 \end{algorithmic}
 \end{algorithm}
