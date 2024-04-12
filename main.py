@@ -7,7 +7,6 @@ class System:
     def __init__(self, loss, horizon, sys, x0, xN):
         self.loss = loss
         self.horizon = horizon
-        # self.inputs = np.random.random(horizon-1)
         self.inputs = np.zeros(horizon-1)
         self.states = np.zeros(horizon)
         self.states[0] = x0
