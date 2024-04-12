@@ -9,7 +9,7 @@ class System:
         self.horizon = horizon
         # self.inputs = np.random.random(horizon-1)
         self.inputs = np.zeros(horizon-1)
-        self.states = np.random.random(horizon)
+        self.states = np.zeros(horizon)
         self.states[0] = x0
         self.state_dest = xN
         self.delta_states = np.zeros(horizon)
@@ -62,8 +62,8 @@ class System:
                 * Vxx \
                 + Vx * self.diff_xx(self.sys, self.states[i], self.inputs[i])
             Qux = self.diff_ux(self.loss, self.states[i], self.inputs[i]) \
-                + self.diff_u(self.sys, self.states[i], self.inputs[i])**2 \
-                * Vxx \
+                + self.diff_u(self.sys, self.states[i], self.inputs[i]) \
+                * Vxx * self.diff_x(self.sys, self.states[i], self.inputs[i]) \
                 + Vx * self.diff_ux(self.sys, self.states[i], self.inputs[i])
             Quu = self.diff_uu(self.loss, self.states[i], self.inputs[i]) \
                 + self.diff_u(self.sys, self.states[i], self.inputs[i])**2 \
@@ -102,8 +102,8 @@ def system(x, u):
 
 
 if __name__ == "__main__":
-    sys2 = System(loss, 10, system, 0.2, 0.3)
-    sys3 = System(loss, 15, system, 0.1, 0.2)
+    sys2 = System(loss, 10, system, 0.9, 0.5)
+    sys3 = System(loss, 10, system, 0.1, 0.2)
     errors2 = []
     errors3 = []
     for i in range(50):
@@ -113,8 +113,8 @@ if __name__ == "__main__":
         sys3.forward()
         errors2.append(sys2.error())
         errors3.append(sys3.error())
-    plt.plot(errors2, label='x0=0.2, u0=0.3')
-    plt.plot(errors3, label='x0=0.1, u0=0.2')
+    plt.plot(errors2, label='x0=0.9, xN=0.5')
+    plt.plot(errors3, label='x0=0.1, xN=0.2')
     plt.ylabel('error of the final states')
     plt.xlabel('iteration')
     plt.legend()
