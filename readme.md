@@ -6,6 +6,7 @@ Only 1-dimensional states and inputs for now.
 ![pseudocode](./pcode.png)
 ## Gallery
 ![Errors](./Figure_1.png)
+![Costs](./Figure_2.png)
 ## References
 [Constrained Differential Dynamic Programming Revisited](https://arxiv.org/abs/2005.00985)
 

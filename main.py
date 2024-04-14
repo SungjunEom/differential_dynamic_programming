@@ -78,7 +78,6 @@ class System:
 
             self.inputs[i] = self.inputs[i] + (k + K * self.delta_states[i])
 
-
     # Auxiliaries
     def summary(self):
         self.sum_count += 1
@@ -90,7 +89,13 @@ class System:
 
     def error(self):
         return self.states[-1] - self.state_dest
-            
+    
+    def full_cost(self, loss):
+        sum = 0
+        for i in range(self.horizon-1):
+            sum += loss(self.states[i], self.inputs[i])
+        sum += loss(self.states[-1], 0)
+        return sum
         
 
 def loss(x, u):
@@ -105,6 +110,8 @@ if __name__ == "__main__":
     sys3 = System(loss, 10, system, 0.1, 0.2)
     errors2 = []
     errors3 = []
+    cost2 = []
+    cost3 = []
     for i in range(50):
         sys2.backward()
         sys3.backward()
@@ -112,9 +119,17 @@ if __name__ == "__main__":
         sys3.forward()
         errors2.append(sys2.error())
         errors3.append(sys3.error())
+        cost2.append(sys2.full_cost(loss))
+        cost3.append(sys3.full_cost(loss))
     plt.plot(errors2, label='x0=0.9, xN=0.5')
     plt.plot(errors3, label='x0=0.1, xN=0.2')
-    plt.ylabel('error of the final states')
+    plt.ylabel('error of the calculated final states with ground truth states')
+    plt.xlabel('iteration')
+    plt.legend()
+    plt.show()
+    plt.plot(cost2, label='x0=0.9, xN=0.5')
+    plt.plot(cost3, label='x0=0.1, xN=0.2')
+    plt.ylabel('full cost')
     plt.xlabel('iteration')
     plt.legend()
     plt.show()

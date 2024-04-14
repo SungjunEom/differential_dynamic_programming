@@ -54,7 +54,7 @@
 \State $\epsilon_f^{\langle i \rangle} \leftarrow x_N - x_N^{\langle i+1 \rangle}$
 \State $x_N^{\langle i+1 \rangle} \leftarrow x_N$
 
-\If {$\epsilon_f^{\langle i \rangle}$ is smaller than the threshold}
+\If {the amount of change of $\epsilon_f^{\langle i \rangle}$ (or the cost $J$) is smaller than the threshold}
 escape the loop
 \EndIf
 \EndFor
