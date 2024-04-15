@@ -42,7 +42,7 @@ class System:
     def forward(self):
         for i in range(1, len(self.states)):
             state = self.sys(self.states[i-1], self.inputs[i-1])
-            self.delta_states[i] = self.states[i] - state
+            self.delta_states[i] = state - self.states[i]
             self.states[i] = state
     
     def backward(self):
@@ -106,7 +106,7 @@ def system(x, u):
 
 
 if __name__ == "__main__":
-    sys2 = System(loss, 10, system, 0.9, 0.5)
+    sys2 = System(loss, 10, system, 0.2, 0.5)
     sys3 = System(loss, 10, system, 0.1, 0.2)
     errors2 = []
     errors3 = []
