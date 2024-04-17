@@ -9,6 +9,7 @@ Only 1-dimensional states and inputs for now.
 ![Costs](./Figure_2.png)
 ![Random](./Figure_3.png)
 ![Overflow](./error.png)
+![Quu](Figure_4.png)
 ## References
 [Constrained Differential Dynamic Programming Revisited](https://arxiv.org/abs/2005.00985)
 
