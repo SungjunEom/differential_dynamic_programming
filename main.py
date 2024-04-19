@@ -20,8 +20,11 @@ class System:
     def get_states(self):
         return self.states
     
-    def set_dest(self):
-        self.states[-1] = self.state_dest
+    def set_dest(self, new=None):
+        if new is None:
+            self.states[-1] = self.state_dest
+        else:
+            self.state_dest = new
 
     def diff_x(self, func, x0, u0, delta=1e-7):
         return (func(x0+delta, u0)-func(x0, u0))/delta
@@ -173,16 +176,23 @@ def dsystem(target, x, u):
 
 
 if __name__ == "__main__":
-    sys2 = System(loss,50, system, 0.1, 0.5, dloss, dsystem)
+    sys2 = System(loss,100, system, 0.1, 2, dloss, dsystem)
     errors2 = []
+    states2 = []
     cost2 = []
     Quu2 = []
-    for i in range(70):
+    for i in range(150):
         sys2.backward()
         sys2.forward()
+        states2.append(sys2.states[-1])
         Quu2.append(sys2.get_Quu())
         errors2.append(sys2.error())
         cost2.append(sys2.full_cost(loss))
+        if i > 100:
+            sys2.set_dest(0.3)
+        elif i > 50:
+            sys2.set_dest(0.1)
+        
     plt.plot(errors2, label='x0=0.2, xN=0.5')
     plt.ylabel('error of the calculated final states with ground truth states')
     plt.xlabel('iteration')
@@ -195,6 +205,11 @@ if __name__ == "__main__":
     plt.show()
     plt.plot(Quu2, label='x0=0.2, xN=0.5')
     plt.ylabel('Quu')
+    plt.xlabel('iteration')
+    plt.legend()
+    plt.show()
+    plt.plot(states2, label='x0=0.2, xN=0.5')
+    plt.ylabel('states')
     plt.xlabel('iteration')
     plt.legend()
     plt.show()
