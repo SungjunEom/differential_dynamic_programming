@@ -22,9 +22,11 @@ class System:
     
     def set_dest(self, new=None):
         if new is None:
-            self.states[-1] = self.state_dest
+            # self.states[-1] = self.state_dest
+            self.states[-1] = -self.state_dest
         else:
-            self.state_dest = new
+            # self.state_dest = new
+            self.state_dest = -new
 
     def diff_x(self, func, x0, u0, delta=1e-7):
         return (func(x0+delta, u0)-func(x0, u0))/delta
