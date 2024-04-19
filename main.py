@@ -25,8 +25,7 @@ class System:
             # self.states[-1] = self.state_dest
             self.states[-1] = -self.state_dest
         else:
-            # self.state_dest = new
-            self.state_dest = -new
+            self.state_dest = new
 
     def diff_x(self, func, x0, u0, delta=1e-7):
         return (func(x0+delta, u0)-func(x0, u0))/delta
@@ -191,9 +190,11 @@ if __name__ == "__main__":
         errors2.append(sys2.error())
         cost2.append(sys2.full_cost(loss))
         if i > 100:
-            sys2.set_dest(0.3)
+            sys2.set_dest(3)
         elif i > 50:
-            sys2.set_dest(0.1)
+            sys2.set_dest(0)
+
+    print('Quu:',sys2.Quu)
 
     fig, axs = plt.subplots(2, 2)
     axs[0, 0].plot(errors2, label='x0=0.2, xN=0.5')
@@ -204,4 +205,5 @@ if __name__ == "__main__":
     axs[1, 0].set_title('Quu')
     axs[1, 1].plot(states2, label='x0=0.2, xN=0.5')
     axs[1, 1].set_title('States')
+    fig.suptitle('states: 2->0->3')
     plt.show()
