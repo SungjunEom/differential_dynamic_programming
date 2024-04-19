@@ -4,9 +4,11 @@ import matplotlib.pyplot as plt
 np.random.seed(0)
 
 class System:
-    def __init__(self, loss, horizon, sys, x0, xN):
+    def __init__(self, loss, horizon, sys, x0, xN, dloss, dsys):
         self.loss = loss
         self.horizon = horizon
+        self.dloss = dloss
+        self.dsys = dsys
         self.inputs = np.zeros(horizon-1)
         self.states = np.zeros(horizon)
         self.states[0] = x0
@@ -45,7 +47,7 @@ class System:
             self.delta_states[i] = state - self.states[i]
             self.states[i] = state
     
-    def backward(self):
+    def backward_numerical(self):
         self.set_dest()
         Vx = self.diff_x(self.loss, self.states[-1], 0)
         Vxx = self.diff_xx(self.loss, self.states[-1],0)
@@ -71,14 +73,50 @@ class System:
             
             self.Quu = Quu
 
-            k = -Qu/(Quu+1e-10)
-            K = -Qux/(Quu+1e-10)
-            # k = -Qu/Quu
-            # K = -Qux/Quu
+            # k = -Qu/(Quu+1e-10)
+            # K = -Qux/(Quu+1e-10)
+            k = -Qu/Quu
+            K = -Qux/Quu
             Vx = Qx - K*Quu*k
             Vxx = Qxx - K*Quu*K
 
             self.inputs[i] = self.inputs[i] + (k + K * self.delta_states[i])
+
+    def backward(self):
+        self.set_dest()
+        Vx = self.dloss('x', self.states[-1], 0)
+        Vxx = self.dloss('xx', self.states[-1], 0)
+        for i in range(len(self.states)-2, -1, -1):
+            Qx = self.dloss('x', self.states[i], self.inputs[i]) \
+                + self.dsys('x', self.states[i], self.inputs[i]) \
+                * Vx
+            Qu = self.dloss('u', self.states[i], self.inputs[i]) \
+                + self.dsys('u', self.states[i], self.inputs[i]) \
+                * Vx
+            Qxx = self.dloss('xx', self.states[i], self.inputs[i]) \
+                + self.dsys('x', self.states[i], self.inputs[i])**2 \
+                * Vxx \
+                + Vx * self.dsys('xx', self.states[i], self.inputs[i])
+            Qux = self.dloss('ux', self.states[i], self.inputs[i]) \
+                + self.dsys('u', self.states[i], self.inputs[i]) \
+                * Vxx * self.dsys('x', self.states[i], self.inputs[i]) \
+                + Vx * self.dsys('ux', self.states[i], self.inputs[i])
+            Quu = self.dloss('uu', self.states[i], self.inputs[i]) \
+                + self.dsys('u', self.states[i], self.inputs[i])**2 \
+                * Vxx \
+                + Vx * self.dsys('uu', self.states[i], self.inputs[i])
+            
+            self.Quu = Quu
+
+            # k = -Qu/(Quu+1e-10)
+            # K = -Qux/(Quu+1e-10)
+            k = -Qu/Quu
+            K = -Qux/Quu
+            Vx = Qx - K*Quu*k
+            Vxx = Qxx - K*Quu*K
+
+            self.inputs[i] = self.inputs[i] + (k + K * self.delta_states[i])
+        
 
     # Auxiliaries
     def summary(self):
@@ -106,36 +144,51 @@ class System:
 def loss(x, u):
     return x**2 + u**2
 
-def system(x, u):
+def dloss(target, x, u):
+    if target=='x':
+        return 2*x
+    elif target=='xx':
+        return 2
+    elif target=='u':
+        return 2*u
+    elif target=='uu':
+        return 2
+    elif target=='ux':
+        return 0
+
+def system(x,u):
     return x**3 + (x**2 + 1)*u
+
+def dsystem(target, x, u):
+    if target=='x':
+        return 3*x**2+2*x*u
+    elif target=='xx':
+        return 6*x+2*u
+    elif target=='u':
+        return x**2+1
+    elif target=='uu':
+        return 0
+    elif target=='ux':
+        return 2*x
 
 
 if __name__ == "__main__":
-    sys2 = System(loss, 10, system, 0.2, 0.5)
-    sys3 = System(loss, 10, system, 0.1, 0.2)
+    sys2 = System(loss,50, system, 0.1, 0.5, dloss, dsystem)
     errors2 = []
-    errors3 = []
     cost2 = []
-    cost3 = []
     Quu2 = []
-    for i in range(50):
+    for i in range(70):
         sys2.backward()
-        sys3.backward()
         sys2.forward()
-        sys3.forward()
         Quu2.append(sys2.get_Quu())
         errors2.append(sys2.error())
-        errors3.append(sys3.error())
         cost2.append(sys2.full_cost(loss))
-        cost3.append(sys3.full_cost(loss))
     plt.plot(errors2, label='x0=0.2, xN=0.5')
-    plt.plot(errors3, label='x0=0.1, xN=0.2')
     plt.ylabel('error of the calculated final states with ground truth states')
     plt.xlabel('iteration')
     plt.legend()
     plt.show()
     plt.plot(cost2, label='x0=0.2, xN=0.5')
-    plt.plot(cost3, label='x0=0.1, xN=0.2')
     plt.ylabel('full cost')
     plt.xlabel('iteration')
     plt.legend()
