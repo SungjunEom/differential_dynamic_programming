@@ -177,11 +177,13 @@ def dsystem(target, x, u):
 
 
 if __name__ == "__main__":
-    sys2 = System(loss,100, system, 0.1, 2, dloss, dsystem)
+    target_state = 2
+    sys2 = System(loss,100, system, 0.1, target_state, dloss, dsystem)
     errors2 = []
     states2 = []
     cost2 = []
     Quu2 = []
+    target_states = []
     for i in range(150):
         sys2.backward()
         sys2.forward()
@@ -189,21 +191,25 @@ if __name__ == "__main__":
         Quu2.append(sys2.get_Quu())
         errors2.append(sys2.error())
         cost2.append(sys2.full_cost(loss))
+        target_states.append(target_state)
         if i > 100:
             sys2.set_dest(3)
+            target_state = 3
         elif i > 50:
             sys2.set_dest(0)
+            target_state = 0
 
     print('Quu:',sys2.Quu)
 
     fig, axs = plt.subplots(2, 2)
-    axs[0, 0].plot(errors2, label='x0=0.2, xN=0.5')
+    axs[0, 0].plot(errors2)
     axs[0, 0].set_title('state errors')
-    axs[0, 1].plot(cost2, label='x0=0.2, xN=0.5')
+    axs[0, 1].plot(cost2)
     axs[0, 1].set_title('Full cost')
-    axs[1, 0].plot(Quu2, label='x0=0.2, xN=0.5')
+    axs[1, 0].plot(Quu2)
     axs[1, 0].set_title('Quu')
-    axs[1, 1].plot(states2, label='x0=0.2, xN=0.5')
+    axs[1, 1].plot(states2)
+    axs[1, 1].plot(target_states, 'r--',)
     axs[1, 1].set_title('States')
     fig.suptitle('states: 2->0->3')
     plt.show()
