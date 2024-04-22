@@ -3,6 +3,11 @@
 Work in progress. 
 
 Only 1-dimensional states and inputs for now.
+### Requirements
+`
+matplotlib, numpy
+`
+
 ![pseudocode](./pcode.png)
 ## Gallery
 ![Plots](Figure_5.png)
