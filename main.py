@@ -182,13 +182,11 @@ if __name__ == "__main__":
     errors2 = []
     states2 = []
     cost2 = []
-    Quu2 = []
     target_states = []
     for i in range(150):
         sys2.backward()
         sys2.forward()
         states2.append(sys2.states[-1])
-        Quu2.append(sys2.get_Quu())
         errors2.append(sys2.error())
         cost2.append(sys2.full_cost(loss))
         target_states.append(target_state)
@@ -206,8 +204,8 @@ if __name__ == "__main__":
     axs[0, 0].set_title('state errors')
     axs[0, 1].plot(cost2)
     axs[0, 1].set_title('Full cost')
-    axs[1, 0].plot(Quu2)
-    axs[1, 0].set_title('Quu')
+    axs[1, 0].plot(sys2.inputs)
+    axs[1, 0].set_title('inputs')
     axs[1, 1].plot(states2)
     axs[1, 1].plot(target_states, 'r--',)
     axs[1, 1].set_title('States')
