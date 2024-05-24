@@ -19,11 +19,23 @@ class System:
         self.sum_count = 0
 
     def forward(self):
-        for i in range(1, len(self.states)):
-            state = self.sys(self.states[i-1], self.inputs[i-1])
-            self.delta_states[i] = state - self.states[i]
-            self.inputs[i-1] = self.inputs[i-1] + (self.ks[i-1]+self.Ks[i-1]*self.delta_states[i])
-            self.states[i] = state
+        # Original implementation
+        #
+        # for i in range(1, len(self.states)):
+        #     state = self.sys(self.states[i-1], self.inputs[i-1])
+        #     self.delta_states[i] = state - self.states[i]
+        #     self.inputs[i-1] = self.inputs[i-1] + (self.ks[i-1]+self.Ks[i-1]*self.delta_states[i])
+        #     self.states[i] = state
+
+        x_hat = self.states
+        u_hat = self.inputs
+        for i in range(len(self.inputs)):
+            control = self.ks[i] + self.Ks[i]*(x_hat[i] - self.states[i])
+            u_hat[i] = np.clip(self.inputs[i] + control,-3,3)
+            x_hat[i+1] = self.sys(x_hat[i], u_hat[i])
+        self.states = x_hat
+        self.inputs = u_hat
+
     
     def backward(self):
         Vx = self.dloss('x', self.states[-1], 0)
@@ -103,7 +115,7 @@ def dsystem(target, x, u):
 
 
 if __name__ == "__main__":
-    sys2 = System(loss,5, system, 1.5, dloss, dsystem)
+    sys2 = System(loss, 6, system, 1, dloss, dsystem)
     for i in range(10):
         sys2.backward()
         sys2.forward()
@@ -113,6 +125,4 @@ if __name__ == "__main__":
     print('Quu:',sys2.Quu)
     states = sys2.states
     plt.plot(states)
-    inputs = sys2.inputs
-    plt.plot(inputs)
     plt.show()
