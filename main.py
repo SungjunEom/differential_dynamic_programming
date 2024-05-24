@@ -62,15 +62,6 @@ class System:
             # Vxx = Qxx - K*Quu*K
             Vx = Qx - Qux*Qu/Quu
             Vxx = Qxx - Qux*Qux/Quu
-
-    # Auxiliaries
-    def summary(self):
-        self.sum_count += 1
-        print()
-        print('====== Summary',self.sum_count,'======')
-        print('states:',self.states)
-        print('inputs:',self.inputs)
-        print('=======================')
     
     def full_cost(self, loss):
         sum = 0
@@ -78,10 +69,7 @@ class System:
             sum += loss(self.states[i], self.inputs[i])
         sum += loss(self.states[-1], 0)
         return sum
-    
-    def get_Quu(self):
-        return self.Quu
-        
+            
 
 def loss(x, u):
     return x**2 + u**2
@@ -115,11 +103,12 @@ def dsystem(target, x, u):
 
 
 if __name__ == "__main__":
-    sys2 = System(loss,3, system, 1.5, dloss, dsystem)
-    cost2 = []
+    sys2 = System(loss,5, system, 1.5, dloss, dsystem)
     for i in range(10):
         sys2.backward()
         sys2.forward()
+        print('ks: ',sys2.ks)
+        print('Ks: ', sys2.Ks)
 
     print('Quu:',sys2.Quu)
     states = sys2.states
