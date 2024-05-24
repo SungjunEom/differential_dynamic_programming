@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 np.random.seed(0)
 
 class System:
-    def __init__(self, loss, horizon, sys, x0, xN, dloss, dsys):
+    def __init__(self, loss, horizon, sys, x0, dloss, dsys):
         self.loss = loss
         self.horizon = horizon
         self.dloss = dloss
@@ -12,20 +12,11 @@ class System:
         self.inputs = np.zeros(horizon-1)
         self.states = np.zeros(horizon)
         self.states[0] = x0
-        self.state_dest = xN
         self.delta_states = np.zeros(horizon)
         self.sys = sys
+        self.ks = np.zeros(horizon-1)
+        self.Ks = np.zeros(horizon-1)
         self.sum_count = 0
-
-    def get_states(self):
-        return self.states
-    
-    def set_dest(self, new=None):
-        if new is None:
-            # self.states[-1] = self.state_dest
-            self.states[-1] = -self.state_dest
-        else:
-            self.state_dest = new
 
     def diff_x(self, func, x0, u0, delta=1e-7):
         return (func(x0+delta, u0)-func(x0, u0))/delta
@@ -49,45 +40,10 @@ class System:
         for i in range(1, len(self.states)):
             state = self.sys(self.states[i-1], self.inputs[i-1])
             self.delta_states[i] = state - self.states[i]
+            self.inputs[i-1] = self.inputs[i-1] + (self.ks[i-1]+self.Ks[i-1]*self.delta_states[i])
             self.states[i] = state
     
-    def backward_numerical(self):
-        self.set_dest()
-        Vx = self.diff_x(self.loss, self.states[-1], 0)
-        Vxx = self.diff_xx(self.loss, self.states[-1],0)
-        for i in range(len(self.states)-2, -1, -1):
-            Qx = self.diff_x(self.loss, self.states[i], self.inputs[i]) \
-                + self.diff_x(self.sys, self.states[i], self.inputs[i]) \
-                * Vx
-            Qu = self.diff_u(self.loss, self.states[i], self.inputs[i]) \
-                + self.diff_u(self.sys, self.states[i], self.inputs[i]) \
-                * Vx
-            Qxx = self.diff_xx(self.loss, self.states[i], self.inputs[i]) \
-                + self.diff_x(self.sys, self.states[i], self.inputs[i])**2 \
-                * Vxx \
-                + Vx * self.diff_xx(self.sys, self.states[i], self.inputs[i])
-            Qux = self.diff_ux(self.loss, self.states[i], self.inputs[i]) \
-                + self.diff_u(self.sys, self.states[i], self.inputs[i]) \
-                * Vxx * self.diff_x(self.sys, self.states[i], self.inputs[i]) \
-                + Vx * self.diff_ux(self.sys, self.states[i], self.inputs[i])
-            Quu = self.diff_uu(self.loss, self.states[i], self.inputs[i]) \
-                + self.diff_u(self.sys, self.states[i], self.inputs[i])**2 \
-                * Vxx \
-                + Vx * self.diff_uu(self.sys, self.states[i], self.inputs[i])
-            
-            self.Quu = Quu
-
-            # k = -Qu/(Quu+1e-10)
-            # K = -Qux/(Quu+1e-10)
-            k = -Qu/Quu
-            K = -Qux/Quu
-            Vx = Qx - K*Quu*k
-            Vxx = Qxx - K*Quu*K
-
-            self.inputs[i] = self.inputs[i] + (k + K * self.delta_states[i])
-
     def backward(self):
-        self.set_dest()
         Vx = self.dloss('x', self.states[-1], 0)
         Vxx = self.dloss('xx', self.states[-1], 0)
         for i in range(len(self.states)-2, -1, -1):
@@ -116,11 +72,12 @@ class System:
             # K = -Qux/(Quu+1e-10)
             k = -Qu/Quu
             K = -Qux/Quu
-            Vx = Qx - K*Quu*k
-            Vxx = Qxx - K*Quu*K
 
-            self.inputs[i] = self.inputs[i] + (k + K * self.delta_states[i])
-        
+            self.ks[i]= k
+            self.Ks[i] = K
+
+            Vx = Qx - K*Quu*k
+            Vxx = Qxx - K*Quu*K        
 
     # Auxiliaries
     def summary(self):
@@ -130,9 +87,6 @@ class System:
         print('states:',self.states)
         print('inputs:',self.inputs)
         print('=======================')
-
-    def error(self):
-        return self.states[-1] - self.state_dest
     
     def full_cost(self, loss):
         sum = 0
@@ -177,37 +131,16 @@ def dsystem(target, x, u):
 
 
 if __name__ == "__main__":
-    target_state = 2
-    sys2 = System(loss,100, system, 0.1, target_state, dloss, dsystem)
-    errors2 = []
-    states2 = []
+    sys2 = System(loss,10, system, 0.6, dloss, dsystem)
     cost2 = []
-    target_states = []
     for i in range(150):
         sys2.backward()
         sys2.forward()
-        states2.append(sys2.states[-1])
-        errors2.append(sys2.error())
         cost2.append(sys2.full_cost(loss))
-        target_states.append(target_state)
-        if i > 100:
-            sys2.set_dest(3)
-            target_state = 3
-        elif i > 50:
-            sys2.set_dest(0)
-            target_state = 0
 
     print('Quu:',sys2.Quu)
-
-    fig, axs = plt.subplots(2, 2)
-    axs[0, 0].plot(errors2)
-    axs[0, 0].set_title('state errors')
-    axs[0, 1].plot(cost2)
-    axs[0, 1].set_title('Full cost')
-    axs[1, 0].plot(sys2.inputs)
-    axs[1, 0].set_title('inputs')
-    axs[1, 1].plot(states2)
-    axs[1, 1].plot(target_states, 'r--',)
-    axs[1, 1].set_title('States')
-    fig.suptitle('states: 2->0->3')
+    states = sys2.states
+    plt.plot(states)
+    inputs = sys2.inputs
+    plt.plot(inputs)
     plt.show()
