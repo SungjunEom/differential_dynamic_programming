@@ -18,24 +18,6 @@ class System:
         self.Ks = np.zeros(horizon-1)
         self.sum_count = 0
 
-    def diff_x(self, func, x0, u0, delta=1e-7):
-        return (func(x0+delta, u0)-func(x0, u0))/delta
-
-    def diff_u(self, func, x0, u0, delta=1e-7):
-        return (func(x0, u0+delta)-func(x0, u0))/delta
-    
-    def diff_xx(self, func, x0, u0, delta=1e-7):
-        return (self.diff_x(func, x0+delta, u0) - self.diff_x(func, x0, u0))/delta
-    
-    def diff_uu(self, func, x0, u0, delta=1e-7):
-        return (self.diff_u(func, x0, u0+delta) - self.diff_u(func, x0, u0))/delta
-    
-    def diff_xu(self, func, x0, u0, delta=1e-7):
-        return (self.diff_x(func, x0, u0+delta) - self.diff_x(func, x0, u0))/delta
-        
-    def diff_ux(self, func, x0, u0, delta=1e-7):
-        return (self.diff_u(func, x0+delta, u0) - self.diff_u(func, x0, u0))/delta
-
     def forward(self):
         for i in range(1, len(self.states)):
             state = self.sys(self.states[i-1], self.inputs[i-1])
@@ -76,8 +58,10 @@ class System:
             self.ks[i]= k
             self.Ks[i] = K
 
-            Vx = Qx - K*Quu*k
-            Vxx = Qxx - K*Quu*K        
+            # Vx = Qx - K*Quu*k
+            # Vxx = Qxx - K*Quu*K
+            Vx = Qx - Qux*Qu/Quu
+            Vxx = Qxx - Qux*Qux/Quu
 
     # Auxiliaries
     def summary(self):
@@ -131,12 +115,11 @@ def dsystem(target, x, u):
 
 
 if __name__ == "__main__":
-    sys2 = System(loss,10, system, 0.6, dloss, dsystem)
+    sys2 = System(loss,3, system, 1.5, dloss, dsystem)
     cost2 = []
-    for i in range(150):
+    for i in range(10):
         sys2.backward()
         sys2.forward()
-        cost2.append(sys2.full_cost(loss))
 
     print('Quu:',sys2.Quu)
     states = sys2.states
