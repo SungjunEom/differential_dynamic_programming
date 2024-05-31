@@ -115,14 +115,21 @@ def dsystem(target, x, u):
 
 
 if __name__ == "__main__":
+    sys1 = System(loss, 6, system, 1, dloss, dsystem)
     sys2 = System(loss, 6, system, 1, dloss, dsystem)
+    states = []
     for i in range(10):
+        sys1.forward()
+
         sys2.backward()
         sys2.forward()
         print('ks: ',sys2.ks)
         print('Ks: ', sys2.Ks)
+        states.append(sys2.states)
 
     print('Quu:',sys2.Quu)
-    states = sys2.states
-    plt.plot(states)
+    plt.plot(states[0])
+    plt.plot(states[1])
+    plt.plot(states[2])
+    plt.plot(sys1.states)
     plt.show()
