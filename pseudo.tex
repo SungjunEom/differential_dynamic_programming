@@ -26,7 +26,7 @@
 \caption{Differential Dynamic Programming}\label{DDP}
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 \begin{algorithmic}[1]
-\Require{Horizon \(N\), System $f(\cdot)$, Initial state $x_0$, Final state $x_N$ ,Loss function $l(\cdot)$, Final cost function $\phi(\cdot)$}
+\Require{Horizon \(N\), System $f(\cdot)$, Initial state $x_0$, Final state $x_N$ ,Loss function $l(\cdot)$, Final cost function $\phi(\cdot)$, Restriction $\Delta u_{max}$}
 \State $\mathbf{x}^{\langle \cdot \rangle}\leftarrow [x_0,0,\ldots,x_N]$
 \State $\delta\mathbf{x}\leftarrow [0,\ldots,0]$
 \State $\mathbf{u}^{\langle \cdot \rangle}\leftarrow [0,\ldots,0]$
@@ -40,6 +40,9 @@
 \State $Q_{xx} \leftarrow \left[\frac{d^2l(x,u)}{dx^2}+\left(\frac{df(x,u)}{dx}\right)^2\cdot V_{xx} + V_x \cdot \frac{d^2f(x,u)}{dx^2}\right]_{x=x_j^{\langle i \rangle},u=u_j^{\langle i \rangle}}$
 \State $Q_{ux} \leftarrow \left[\frac{d^2l(x,u)}{dudx}+\left(\frac{df(x,u)}{du}\right)\cdot V_{xx} \cdot \left(\frac{df(x,u)}{dx}\right) + V_x \cdot \frac{d^2f(x,u)}{dudx}\right]_{x=x_j^{\langle i \rangle},u=u_j^{\langle i \rangle}}$
 \State $Q_{uu} \leftarrow \left[\frac{d^2l(x,u)}{du^2}+\left(\frac{df(x,u)}{du}\right)^2\cdot V_{xx} + V_x \cdot \frac{d^2f(x,u)}{du^2}\right]_{x=x_j^{\langle i \rangle},u=u_j^{\langle i \rangle}}$
+\If {the control input $u$ is scalar}
+\State $Q_{uu} \leftarrow \max\{Q_{uu},|Q_{uu}|/\Delta u_{max}\}$
+\EndIf
 \State Let $k=-Q_{uu}^{-1}Q_{u}$ and $K=-Q_{uu}^{-1}Q_{ux}$
 \State $\delta u_j \leftarrow k+K\delta x_j$\textcolor{gray}{\Comment{updating the control input at j}}
 \State $ u_j^{\langle i+1\rangle} \leftarrow u_j^{\langle i\rangle} + \delta u_j$
@@ -53,7 +56,6 @@
 \EndFor
 \State $\epsilon_f^{\langle i \rangle} \leftarrow x_N - x_N^{\langle i+1 \rangle}$
 \State $x_N^{\langle i+1 \rangle} \leftarrow x_N$
-
 \If {the amount of change of $\epsilon_f^{\langle i \rangle}$ (or the cost $J$) is smaller than the threshold}
 escape the loop
 \EndIf
