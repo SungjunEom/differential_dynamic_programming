@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 np.random.seed(0)
 
 class System:
-    def __init__(self, loss, horizon, sys, x0, dloss, dsys):
+    def __init__(self, loss, horizon, sys, x0, dloss, dsys, dumax=0.6):
         self.loss = loss
         self.horizon = horizon
         self.dloss = dloss
@@ -17,6 +17,7 @@ class System:
         self.ks = np.zeros(horizon-1)
         self.Ks = np.zeros(horizon-1)
         self.sum_count = 0
+        self.dumax = dumax
 
     def forward(self):
         # Original implementation
@@ -62,8 +63,8 @@ class System:
             
             self.Quu = Quu
 
-            # k = -Qu/(Quu+1e-10)
-            # K = -Qux/(Quu+1e-10)
+            # This system has a scalar input. Always be the restriction.
+            Quu = max(Quu, abs(Quu)/self.dumax)
             k = -Qu/Quu
             K = -Qux/Quu
 
@@ -115,12 +116,9 @@ def dsystem(target, x, u):
 
 
 if __name__ == "__main__":
-    sys1 = System(loss, 6, system, 1, dloss, dsystem)
-    sys2 = System(loss, 6, system, 1, dloss, dsystem)
+    sys2 = System(loss, 6, system, 1.02, dloss, dsystem)
     states = []
     for i in range(10):
-        sys1.forward()
-
         sys2.backward()
         sys2.forward()
         print('ks: ',sys2.ks)
@@ -131,5 +129,4 @@ if __name__ == "__main__":
     plt.plot(states[0])
     plt.plot(states[1])
     plt.plot(states[2])
-    plt.plot(sys1.states)
     plt.show()

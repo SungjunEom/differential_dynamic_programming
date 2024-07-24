@@ -9,9 +9,9 @@ matplotlib, numpy
 `
 
 ![pseudocode](./pcode.png)
-## Gallery
-![Plots](Figure_5.png)
 ## References
 [Constrained Differential Dynamic Programming Revisited](https://arxiv.org/abs/2005.00985)
 
 [Control-Limited Differential Dynamic Programming](https://homes.cs.washington.edu/~todorov/papers/TassaICRA14.pdf)
+
+[The Application Of Optimal Control Methodology To Nonlinear Programming Problems](https://link.springer.com/article/10.1007/BF01584253)
