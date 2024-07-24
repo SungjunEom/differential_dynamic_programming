@@ -137,4 +137,6 @@ if __name__ == "__main__":
     plt.plot(states[59], label='60th iteration')
     plt.plot(states[-1], label='100th iteration')
     plt.legend()
+    plt.xlabel('Time step')
+    plt.ylabel('Magnitude')
     plt.show()
