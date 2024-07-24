@@ -9,6 +9,7 @@ class System:
         self.horizon = horizon
         self.dloss = dloss
         self.dsys = dsys
+        self.x0 = x0
         self.inputs = np.zeros(horizon-1)
         self.states = np.zeros(horizon)
         self.states[0] = x0
@@ -28,12 +29,15 @@ class System:
         #     self.inputs[i-1] = self.inputs[i-1] + (self.ks[i-1]+self.Ks[i-1]*self.delta_states[i])
         #     self.states[i] = state
 
-        x_hat = self.states
-        u_hat = self.inputs
-        for i in range(len(self.inputs)):
-            control = self.ks[i] + self.Ks[i]*(x_hat[i] - self.states[i])
-            u_hat[i] = np.clip(self.inputs[i] + control,-3,3)
+        x_hat = np.zeros(self.horizon-1)
+        u_hat = np.zeros(self.horizon-1)
+        x_hat[0] = self.x0
+        u_hat[0] = self.ks[0]
+        for i in range(len(self.inputs)-1):
             x_hat[i+1] = self.sys(x_hat[i], u_hat[i])
+            control = self.ks[i+1] + self.Ks[i+1]*(x_hat[i+1] - self.states[i+1])
+            # u_hat[i+1] = np.clip(self.inputs[i+1] + control/((i+1)*(i+1)),-3,3) # Multiplying decreasing gamma by dividing the control by i^2
+            u_hat[i+1] = self.inputs[i+1] + control/((i+1)*(i+1)) # Multiplying decreasing gamma by dividing the control by i^2
         self.states = x_hat
         self.inputs = u_hat
 
@@ -116,9 +120,9 @@ def dsystem(target, x, u):
 
 
 if __name__ == "__main__":
-    sys2 = System(loss, 6, system, 1.02, dloss, dsystem)
+    sys2 = System(loss, 6, system, 1.03, dloss, dsystem)
     states = []
-    for i in range(10):
+    for i in range(100):
         sys2.backward()
         sys2.forward()
         print('ks: ',sys2.ks)
@@ -126,7 +130,11 @@ if __name__ == "__main__":
         states.append(sys2.states)
 
     print('Quu:',sys2.Quu)
-    plt.plot(states[0])
-    plt.plot(states[1])
-    plt.plot(states[2])
+    plt.plot(states[9], label='10th iteration')
+    plt.plot(states[19], label='20th iteration')
+    plt.plot(states[29], label='30th iteration')
+    plt.plot(states[49], label='50th iteration')
+    plt.plot(states[59], label='60th iteration')
+    plt.plot(states[-1], label='100th iteration')
+    plt.legend()
     plt.show()
