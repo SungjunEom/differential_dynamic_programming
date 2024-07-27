@@ -35,9 +35,8 @@ class System:
         u_hat[0] = self.ks[0]
         for i in range(len(self.inputs)-1):
             x_hat[i+1] = self.sys(x_hat[i], u_hat[i])
-            control = self.ks[i+1] + self.Ks[i+1]*(x_hat[i+1] - self.states[i+1])
-            # u_hat[i+1] = np.clip(self.inputs[i+1] + control/((i+1)*(i+1)),-3,3) # Multiplying decreasing gamma by dividing the control by i^2
-            u_hat[i+1] = self.inputs[i+1] + control/((i+1)*(i+1)) # Multiplying decreasing gamma by dividing the control by i^2
+            control = self.ks[i+1]/((i+1)*(i+1)) + self.Ks[i+1]*(x_hat[i+1] - self.states[i+1])
+            u_hat[i+1] = self.inputs[i+1] + control
         self.states = x_hat
         self.inputs = u_hat
 
