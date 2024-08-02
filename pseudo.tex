@@ -26,7 +26,7 @@
 \caption{Differential Dynamic Programming}\label{DDP}
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 \begin{algorithmic}[1]
-\Require{Horizon \(N\), System $f(\cdot)$, Initial state $x_0$, Final state $x_N$ ,Loss function $l(\cdot)$, Final cost function $\phi(\cdot)$, Restriction $\Delta u_{max}$, Step length $\gamma(i)$}
+\Require{Horizon \(N\), System $f(\cdot)$, Initial state $x_0$, Final state $x_N$ ,Loss function $l(\cdot)$, Final cost function $\phi(\cdot)$, Restriction $\Delta u_{max}$, Step length $\gamma(\cdot)$}
 \State $\mathbf{x}^{\langle \cdot \rangle}\leftarrow [x_0,0,\ldots,x_N]$
 \State $\delta\mathbf{x}\leftarrow [0,\ldots,0]$
 \State $\mathbf{u}^{\langle \cdot \rangle}\leftarrow [0,\ldots,0]$
@@ -48,12 +48,17 @@
 \State $V_{xx} \leftarrow Q_{xx}-K_j\cdot Q_{uu}\cdot K_j$
 \EndFor
 \State $x_0^{\langle i+1 \rangle} \leftarrow x_0$
-\State $u_0^{\langle i+1 \rangle} \leftarrow u_0^{\langle i \rangle} + k$ 
+\State $u_0^{\langle i+1 \rangle} \leftarrow u_0^{\langle i \rangle} + k$
+\For {$l = 0, 1, 2, \ldots, M$}\textcolor{gray}{\Comment{Adjusting steplength}}
 \For {$j = 0,1,2,\ldots,N-1$}\textcolor{gray}{\Comment{forward pass}}
 \State $x_{j+1}^{\langle i+1 \rangle} \leftarrow f(x_j^{\langle i+1 \rangle},u_j^{\langle i+1 \rangle})$
 \State $\delta x_{j+1} \leftarrow x_{j+1}^{\langle i+1 \rangle} - x_{j+1}^{\langle i \rangle}$
-\State $\delta u_{j+1} \leftarrow k_j+K_j\delta x_{j+1}$\textcolor{gray}{\Comment{updating the control input at j}}
-\State $ u_{j+1}^{\langle i+1\rangle} \leftarrow u_{j+1}^{\langle i\rangle} + \gamma(i)\delta u_{j+1}$
+\State $\delta u_{j+1} \leftarrow k_j\gamma(l)+K_j\delta x_{j+1}$\textcolor{gray}{\Comment{updating the control input at j}}
+\State $ u_{j+1}^{\langle i+1\rangle} \leftarrow u_{j+1}^{\langle i\rangle} + \delta u_{j+1}$
+\EndFor
+\If {$V(u^{\langle i+1 \rangle}) < V(u^{\langle i \rangle})$}
+escape the loop
+\EndIf
 \EndFor
 \State $\epsilon_f^{\langle i \rangle} \leftarrow x_N - x_N^{\langle i+1 \rangle}$
 \State $x_N^{\langle i+1 \rangle} \leftarrow x_N$
