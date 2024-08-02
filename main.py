@@ -19,6 +19,7 @@ class System:
         self.Ks = np.zeros(horizon-1)
         self.sum_count = 0
         self.dumax = dumax
+        # self.v_bar = self.full_cost()
 
     def forward(self):
         # Original implementation
@@ -33,10 +34,20 @@ class System:
         u_hat = np.zeros(self.horizon-1)
         x_hat[0] = self.x0
         u_hat[0] = self.ks[0]
-        for i in range(len(self.inputs)-1):
-            x_hat[i+1] = self.sys(x_hat[i], u_hat[i])
-            control = self.ks[i+1]/((i+1)*(i+1)) + self.Ks[i+1]*(x_hat[i+1] - self.states[i+1])
-            u_hat[i+1] = self.inputs[i+1] + control
+        v_bar = self.full_cost()
+        for j in range(100): # Maximum gamma interation
+            for i in range(len(self.inputs)-1):
+                x_hat[i+1] = self.sys(x_hat[i], u_hat[i])
+                dcontrol_i = self.ks[i+1]*pow(1/2,j) + self.Ks[i+1]*(x_hat[i+1] - self.states[i+1])
+                u_hat[i+1] = self.inputs[i+1] + dcontrol_i
+            v = self.full_cost(x_hat, u_hat)
+            if v < v_bar:
+                v_bar = v
+                break
+            # print('j: ',j)
+            # print('v_bar: ', self.v_bar)
+            # print('v: ', v)
+            
         self.states = x_hat
         self.inputs = u_hat
 
@@ -79,11 +90,16 @@ class System:
             Vx = Qx - Qux*Qu/Quu
             Vxx = Qxx - Qux*Qux/Quu
     
-    def full_cost(self, loss):
+    def full_cost(self, x=None, u=None):
         sum = 0
-        for i in range(self.horizon-1):
-            sum += loss(self.states[i], self.inputs[i])
-        sum += loss(self.states[-1], 0)
+        if x is not None and u is not None:
+            for i in range(self.horizon-1):
+                sum += self.loss(x[i], u[i])
+            sum += self.loss(x[-1], 0)
+        else:
+            for i in range(self.horizon-1):
+                sum += self.loss(self.states[i], self.inputs[i])
+            sum += self.loss(self.states[-1], 0)
         return sum
             
 
@@ -119,13 +135,14 @@ def dsystem(target, x, u):
 
 
 if __name__ == "__main__":
-    sys2 = System(loss, 6, system, 1.03, dloss, dsystem)
+    sys2 = System(loss, 6, system, 1.02, dloss, dsystem)
     states = []
     for i in range(100):
+        print('iter: ', i)
         sys2.backward()
         sys2.forward()
-        print('ks: ',sys2.ks)
-        print('Ks: ', sys2.Ks)
+        # print('ks: ',sys2.ks)
+        # print('Ks: ', sys2.Ks)
         states.append(sys2.states)
 
     print('Quu:',sys2.Quu)
