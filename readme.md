@@ -12,7 +12,7 @@ matplotlib, numpy
 ## Gallery
 Initial state=1.02
 
-Steplength=1/i^2
+Steplength=(1/2)^l
 
 ![error1](./error.png)
 ![error2](./error_2.png)
