@@ -35,7 +35,7 @@ class System:
         x_hat[0] = self.x0
         u_hat[0] = self.ks[0]
         v_bar = self.full_cost()
-        for j in range(100): # Maximum gamma interation
+        for j in range(100): # Maximum gamma iteration
             for i in range(len(self.inputs)-1):
                 x_hat[i+1] = self.sys(x_hat[i], u_hat[i])
                 dcontrol_i = self.ks[i+1]*pow(1/2,j) + self.Ks[i+1]*(x_hat[i+1] - self.states[i+1])
