@@ -15,6 +15,7 @@ Initial state=1.02
 Steplength=1/i^2
 
 ![error1](./error.png)
+![error2](./error_2.png)
 ## References
 [Constrained Differential Dynamic Programming Revisited](https://arxiv.org/abs/2005.00985)
 

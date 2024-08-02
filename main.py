@@ -152,5 +152,11 @@ if __name__ == "__main__":
     plt.plot(states[-1], label='100th iteration')
     plt.legend()
     plt.xlabel('Time step')
-    plt.ylabel('Magnitude')
+    plt.ylabel('State')
+    plt.show()
+
+    plt.plot(sys2.inputs, 'ko-', label='final_inputs')
+    plt.legend()
+    plt.xlabel('Time step')
+    plt.ylabel('Input')
     plt.show()
