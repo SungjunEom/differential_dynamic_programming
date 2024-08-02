@@ -160,3 +160,4 @@ if __name__ == "__main__":
     plt.xlabel('Time step')
     plt.ylabel('Input')
     plt.show()
+    print(sys2.inputs)
