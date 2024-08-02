@@ -19,17 +19,10 @@ class System:
         self.Ks = np.zeros(horizon-1)
         self.sum_count = 0
         self.dumax = dumax
-        self.v_bar = 99999999999999
+        self.v_bar = np.inf
+        self.gamma_flag = False # For a debugging purpose only. Can be deleted.
 
     def forward(self):
-        # Original implementation
-        #
-        # for i in range(1, len(self.states)):
-        #     state = self.sys(self.states[i-1], self.inputs[i-1])
-        #     self.delta_states[i] = state - self.states[i]
-        #     self.inputs[i-1] = self.inputs[i-1] + (self.ks[i-1]+self.Ks[i-1]*self.delta_states[i])
-        #     self.states[i] = state
-
         x_hat = np.zeros(self.horizon-1)
         u_hat = np.zeros(self.horizon-1)
         x_hat[0] = self.x0
@@ -45,6 +38,8 @@ class System:
                 print('v: ', v)
                 self.v_bar = v
                 break
+            print('Gamma is being updated')
+            self.gamma_flag = True
             
         self.states = x_hat
         self.inputs = u_hat
@@ -133,7 +128,7 @@ def dsystem(target, x, u):
 
 
 if __name__ == "__main__":
-    sys2 = System(loss, 6, system, 1.08, dloss, dsystem)
+    sys2 = System(loss, 6, system, 1.5, dloss, dsystem)
     states = []
     for i in range(100):
         print('iteration: ', i)
@@ -144,7 +139,7 @@ if __name__ == "__main__":
         states.append(sys2.states)
 
     print('Quu:',sys2.Quu)
-    plt.plot(states[9], label='10th iteration')
+    # plt.plot(states[9], label='10th iteration')
     plt.plot(states[19], label='20th iteration')
     plt.plot(states[29], label='30th iteration')
     plt.plot(states[49], label='50th iteration')
@@ -161,3 +156,4 @@ if __name__ == "__main__":
     plt.ylabel('Input')
     plt.show()
     print(sys2.inputs)
+    print(sys2.gamma_flag)
