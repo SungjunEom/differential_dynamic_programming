@@ -128,7 +128,7 @@ def dsystem(target, x, u):
 
 
 if __name__ == "__main__":
-    sys2 = System(loss, 6, system, 1.5, dloss, dsystem)
+    sys2 = System(loss, 6, system, 1.02, dloss, dsystem)
     states = []
     for i in range(100):
         print('iteration: ', i)
