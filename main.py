@@ -49,22 +49,24 @@ class System:
         Vx = self.dloss('x', self.states[-1], 0)
         Vxx = self.dloss('xx', self.states[-1], 0)
         for i in range(len(self.states)-2, -1, -1):
+            dx = self.dsys('x', self.states[i], self.inputs[i])
+            du = self.dsys('u', self.states[i], self.inputs[i])
             Qx = self.dloss('x', self.states[i], self.inputs[i]) \
-                + self.dsys('x', self.states[i], self.inputs[i]) \
+                + dx \
                 * Vx
             Qu = self.dloss('u', self.states[i], self.inputs[i]) \
-                + self.dsys('u', self.states[i], self.inputs[i]) \
+                + du \
                 * Vx
             Qxx = self.dloss('xx', self.states[i], self.inputs[i]) \
-                + self.dsys('x', self.states[i], self.inputs[i])**2 \
+                + dx**2 \
                 * Vxx \
                 + Vx * self.dsys('xx', self.states[i], self.inputs[i])
             Qux = self.dloss('ux', self.states[i], self.inputs[i]) \
-                + self.dsys('u', self.states[i], self.inputs[i]) \
-                * Vxx * self.dsys('x', self.states[i], self.inputs[i]) \
+                + du \
+                * Vxx * dx \
                 + Vx * self.dsys('ux', self.states[i], self.inputs[i])
             Quu = self.dloss('uu', self.states[i], self.inputs[i]) \
-                + self.dsys('u', self.states[i], self.inputs[i])**2 \
+                + du**2 \
                 * Vxx \
                 + Vx * self.dsys('uu', self.states[i], self.inputs[i])
             
