@@ -16,6 +16,20 @@ Steplength=(1/2)^l
 
 ![error1](./error.png)
 ![error2](./error_2.png)
+
+Initial state=1.2
+
+Steplength=(1/2)^l
+
+![error3](./error_3.png)
+![error4](./error_4.png)
+
+Initial state=1.1
+
+Steplength=(1/2)^l
+
+![error5](./error_5.png)
+![error6](./error_6.png)
 ## References
 [Constrained Differential Dynamic Programming Revisited](https://arxiv.org/abs/2005.00985)
 

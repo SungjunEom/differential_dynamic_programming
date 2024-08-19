@@ -130,9 +130,9 @@ def dsystem(target, x, u):
 
 
 if __name__ == "__main__":
-    sys2 = System(loss, 6, system, 1.02, dloss, dsystem)
+    sys2 = System(loss, 6, system, 1.2, dloss, dsystem)
     states = []
-    for i in range(100):
+    for i in range(1000):
         print('iteration: ', i)
         sys2.backward()
         sys2.forward()
@@ -142,17 +142,20 @@ if __name__ == "__main__":
 
     print('Quu:',sys2.Quu)
     # plt.plot(states[9], label='10th iteration')
-    plt.plot(states[0], label='1st iteration')
-    plt.plot(states[1], label='2rd iteration')
-    plt.plot(states[2], label='3nd iteration')
-    plt.plot(states[3], label='4th iteration')
-    plt.plot(states[4], label='5th iteration')
-    plt.plot(states[5], label='6th iteration')
-    plt.plot(states[6], label='7th iteration')
-    plt.plot(states[7], label='8th iteration')
-    plt.plot(states[8], label='9th iteration')
-    plt.plot(states[9], label='10th iteration')
-    plt.plot(states[-1], label='100th iteration')
+    # plt.plot(states[0], label='1st iteration')
+    # plt.plot(states[1], label='2rd iteration')
+    # plt.plot(states[2], label='3nd iteration')
+    # plt.plot(states[3], label='4th iteration')
+    # plt.plot(states[4], label='5th iteration')
+    # plt.plot(states[5], label='6th iteration')
+    # plt.plot(states[6], label='7th iteration')
+    # plt.plot(states[7], label='8th iteration')
+    # plt.plot(states[8], label='9th iteration')
+    # plt.plot(states[9], label='10th iteration')
+    plt.plot(states[99], label='100th iteration')
+    plt.plot(states[199], label='200th iteration')
+    plt.plot(states[299], label='300th iteration')
+    plt.plot(states[-1], label='1000th iteration')
     plt.legend()
     plt.xlabel('Time step')
     plt.ylabel('State')
