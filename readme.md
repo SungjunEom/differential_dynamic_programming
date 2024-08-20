@@ -23,6 +23,9 @@ Steplength=(1/2)^l
 
 ![error3](./error_3.png)
 ![error4](./error_4.png)
+The image above is captured at 1000 iteration.
+![error4](./error_4_2.png)
+The image above is captured at 10,000,000 iteration.
 
 Initial state=1.1
 
